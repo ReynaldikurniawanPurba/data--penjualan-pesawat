@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPK Pemilihan Pesawat - Metode Oreste</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans p-6">
+
+    <div class="max-w-6xl mx-auto bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700">
+        <h1 class="text-3xl font-extrabold text-center text-blue-400 mb-2">✈️ Pesawat Sales Decision Support System</h1>
+        <p class="text-center text-slate-400 mb-8 font-medium">Analisis Kelayakan Penjualan & Pemilihan Armada Pesawat Menggunakan Metode Oreste</p>
+
+        <div class="mb-8 p-5 bg-blue-950/40 border border-blue-800/60 rounded-lg text-sm text-blue-200">
+            <span class="font-bold text-blue-400">💡 Cara Kerja (Studi Kasus Pen penjualan Pesawat):</span> 
+            Kami telah menginput 3 kompetitor pesawat komersial terbesar saat ini beserta kriteria performanya. Nilai pada matriks di bawah merupakan **Ranking Performa awal** (Angka 1 berarti terbaik pada kriteria tersebut, angka 2 cukup baik, angka 3 kurang baik). Nilai Bobot menentukan kriteria mana yang paling diprioritaskan perusahaan.
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="p-6 bg-slate-800/50 rounded-lg border border-slate-700">
+                <h2 class="text-xl font-semibold text-blue-400 mb-4">1. Kriteria & Bobot Prioritas</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="critName" placeholder="Nama Kriteria" class="flex-1 p-2 border border-slate-600 rounded bg-slate-700 text-white placeholder-slate-400 text-sm">
+                    <input type="number" id="critWeight" placeholder="Bobot" class="w-24 p-2 border border-slate-600 rounded bg-slate-700 text-white placeholder-slate-400 text-sm">
+                    <button onclick="addKriteria()" class="bg-blue-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-blue-500 transition">Tambah</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-700 text-slate-300">
+                            <tr>
+                                <th class="p-2">Kode</th>
+                                <th class="p-2">Kriteria</th>
+                                <th class="p-2">Bobot</th>
+                                <th class="p-2 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kriteriaTable" class="divide-y divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="p-6 bg-slate-800/50 rounded-lg border border-slate-700">
+                <h2 class="text-xl font-semibold text-purple-400 mb-4">2. Alternatif Pesawat</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="altName" placeholder="Nama Model Pesawat" class="flex-1 p-2 border border-slate-600 rounded bg-slate-700 text-white placeholder-slate-400 text-sm">
+                    <button onclick="addAlternatif()" class="bg-purple-600 text-white px-3 py-2 rounded text-sm font-semibold hover:bg-purple-500 transition">Tambah</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-700 text-slate-300">
+                            <tr>
+                                <th class="p-2">Kode</th>
+                                <th class="p-2">Model Pesawat</th>
+                                <th class="p-2 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alternatifTable" class="divide-y divide-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8 p-6 bg-slate-800/50 rounded-lg border border-slate-700">
+            <h2 class="text-xl font-semibold text-amber-400 mb-2">3. Matriks Penilaian (Ranking Awal)</h2>
+            <p class="text-xs text-amber-300/80 mb-4">*Silakan sesuaikan ranking kecocokan alternatif pesawat (1 = Terbaik, 2 = Cukup, 3 = Kurang).</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead id="matrixHead" class="bg-amber-700 text-slate-100"></thead>
+                    <tbody id="matrixBody" class="divide-y divide-slate-700"></tbody>
+                </table>
+            </div>
+            <button onclick="hitungOreste()" class="mt-6 w-full bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-md font-bold text-lg transition shadow-lg tracking-wide">
+                🚀 PROSES HITUNG METODE ORESTE
+            </button>
+        </div>
+
+        <div id="hasilSection" class="hidden p-6 bg-emerald-950/40 rounded-lg border border-emerald-800/80 transition-all">
+            <h2 class="text-xl font-semibold text-emerald-400 mb-4">📊 Hasil Rekomendasi Pesawat Terbaik</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-emerald-700 text-white text-sm">
+                        <tr>
+                            <th class="p-3 rounded-l-md">Peringkat</th>
+                            <th class="p-3">Model Pesawat</th>
+                            <th class="p-3 rounded-r-md">Nilai Akhir (Net Preference S)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingTable" class="divide-y divide-emerald-900/60 text-emerald-100"></tbody>
+                </table>
+            </div>
+            <p class="text-xs text-emerald-400/80 mt-4">*Catatan: Pada Metode Oreste, alternatif dengan **Nilai S Terkecil** menempati posisi teratas (Terbaik).</p>
+        </div>
+
+    </div>
+
+    <script>
+        // DATA DEFAULT PENJUALAN PESAWAT SEBAGAI CONTOH AWAL
+        let kriteria = [
+            { id: 'C1', name: 'Volume Penjualan (Unit)', weight: 40 },
+            { id: 'C2', name: 'Sisa Antrean / Backlog', weight: 30 },
+            { id: 'C3', name: 'Efisiensi Bahan Bakar', weight: 20 },
+            { id: 'C4', name: 'Harga Ekonomis', weight: 10 }
+        ];
+
+        let alternatif = [
+            { id: 'A1', name: 'Airbus A320neo' },
+            { id: 'A2', name: 'Boeing 737 MAX' },
+            { id: 'A3', name: 'COMAC C919' }
+        ];
+
+        // Nilai default: Ranking kecocokan (Semakin kecil angkanya, semakin unggul di kriteria tersebut)
+        let matriks = {
+            'A1': { 'C1': 1, 'C2': 1, 'C3': 1, 'C4': 2 }, // Airbus unggul penjualan & backlog
+            'A2': { 'C1': 2, 'C2': 2, 'C3': 2, 'C4': 3 }, // Boeing runner-up
+            'A3': { 'C1': 3, 'C2': 3, 'C3': 3, 'C4': 1 }  // COMAC paling murah (Unggul di Harga)
+        };
+
+        // Jalankan render pertama kali saat halaman dimuat
+        window.onload = function() {
+            renderAll();
+        };
+
+        function addKriteria() {
+            const name = document.getElementById('critName').value.trim();
+            const weight = parseFloat(document.getElementById('critWeight').value);
+            if(!name || isNaN(weight)) return alert('Isi data kriteria dengan lengkap!');
+            const id = 'C' + (kriteria.length + 1);
+            kriteria.push({ id, name, weight });
+            document.getElementById('critName').value = '';
+            document.getElementById('critWeight').value = '';
+            renderAll();
+        }
+
+        function deleteKriteria(index) {
+            kriteria.splice(index, 1);
+            kriteria.forEach((c, i) => c.id = 'C' + (i + 1));
+            renderAll();
+        }
+
+        function addAlternatif() {
+            const name = document.getElementById('altName').value.trim();
+            if(!name) return alert('Isi nama pesawat!');
+            const id = 'A' + (alternatif.length + 1);
+            alternatif.push({ id, name });
+            matriks[id] = {};
+            document.getElementById('altName').value = '';
+            renderAll();
+        }
+
+        function deleteAlternatif(index) {
+            delete matriks[alternatif[index].id];
+            alternatif.splice(index, 1);
+            alternatif.forEach((a, i) => a.id = 'A' + (i + 1));
+            renderAll();
+        }
+
+        function updateMatriks(altId, critId, val) {
+            if(!matriks[altId]) matriks[altId] = {};
+            matriks[altId][critId] = parseFloat(val);
+        }
+
+        function renderAll() {
+            // Render Tabel Kriteria
+            document.getElementById('kriteriaTable').innerHTML = kriteria.map((c, i) => `
+                <tr class="hover:bg-slate-700/30">
+                    <td class="p-2 font-mono text-blue-400 font-bold">${c.id}</td>
+                    <td class="p-2">${c.name}</td>
+                    <td class="p-2">${c.weight}%</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteKriteria(${i})" class="text-red-400 hover:text-red-300 transition">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Tabel Alternatif
+            document.getElementById('alternatifTable').innerHTML = alternatif.map((a, i) => `
+                <tr class="hover:bg-slate-700/30">
+                    <td class="p-2 font-mono text-purple-400 font-bold">${a.id}</td>
+                    <td class="p-2">${a.name}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteAlternatif(${i})" class="text-red-400 hover:text-red-300 transition">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Form Matriks
+            const mHead = document.getElementById('matrixHead');
+            const mBody = document.getElementById('matrixBody');
+
+            if (kriteria.length === 0 || alternatif.length === 0) {
+                mHead.innerHTML = '';
+                mBody.innerHTML = '<tr><td colspan="100%" class="p-4 text-center text-slate-500">Data kriteria atau pesawat kosong.</td></tr>';
+                return;
+            }
+
+            mHead.innerHTML = `
+                <tr>
+                    <th class="p-3">Nama Pesawat</th>
+                    ${kriteria.map(c => `<th class="p-3 text-center">${c.name} (${c.id})</th>`).join('')}
+                </tr>
+            `;
+
+            mBody.innerHTML = alternatif.map(a => `
+                <tr class="hover:bg-slate-700/20">
+                    <td class="p-3 font-semibold text-slate-200 bg-slate-800">${a.name}</td>
+                    ${kriteria.map(c => {
+                        const val = matriks[a.id]?.[c.id] !== undefined ? matriks[a.id][c.id] : '';
+                        return `
+                            <td class="p-2">
+                                <input type="number" value="${val}" 
+                                    onchange="updateMatriks('${a.id}', '${c.id}', this.value)" 
+                                    class="w-20 mx-auto block p-1 border border-slate-600 bg-slate-900 rounded text-center text-white focus:border-amber-500 focus:outline-none" placeholder="Rank">
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            `).join('');
+        }
+
+        // PERHITUNGAN CORE ORESTE METHOD
+        function hitungOreste() {
+            if(kriteria.length === 0 || alternatif.length === 0) return alert('Lengkapi kriteria dan alternatif dahulu!');
+
+            // Validasi data inputan matriks
+            for(let a of alternatif) {
+                for(let c of kriteria) {
+                    if(matriks[a.id]?.[c.id] === undefined || isNaN(matriks[a.id][c.id])) {
+                        return alert(`Tolong isi nilai ranking untuk ${a.name} pada kriteria ${c.name}`);
+                    }
+                }
+            }
+
+            // 1. Hitung Besson Rank untuk Bobot Kriteria (Diurutkan dari bobot terbesar ke terkecil)
+            let sortedKriteria = [...kriteria].sort((a,b) => b.weight - a.weight);
+            let kriteriaRank = {};
+            
+            let i = 0;
+            while(i < sortedKriteria.length) {
+                let j = i;
+                let sumRank = 0;
+                while(j < sortedKriteria.length && sortedKriteria[j].weight === sortedKriteria[i].weight) {
+                    sumRank += (j + 1);
+                    j++;
+                }
+                let avgRank = sumRank / (j - i);
+                for(let k = i; k < j; k++) {
+                    kriteriaRank[sortedKriteria[k].id] = avgRank;
+                }
+                i = j;
+            }
+
+            // 2. Hitung Nilai Jarak (D) dengan alpha = 3, lalu cari rata-rata Net Preference (S)
+            const alpha = 3; 
+            let hasilAkhir = [];
+
+            alternatif.forEach(a => {
+                let totalD = 0;
+                kriteria.forEach(c => {
+                    let rankAlt = matriks[a.id][c.id]; 
+                    let rankKrit = kriteriaRank[c.id];  
+                    
+                    // Rumus Jarak Besson: D = (0.5 * (Rank_Alt^alpha + Rank_Krit^alpha))^(1/alpha)
+                    let D = Math.pow(0.5 * (Math.pow(rankAlt, alpha) + Math.pow(rankKrit, alpha)), 1 / alpha);
+                    totalD += D;
+                });
+
+                let nilaiS = totalD / kriteria.length; 
+                hasilAkhir.push({ id: a.id, name: a.name, score: nilaiS });
+            });
+
+            // 3. Urutkan Hasil Berdasarkan Nilai S Terkecil (Karakteristik Oreste)
+            hasilAkhir.sort((a, b) => a.score - b.score);
+
+            // 4. Tampilkan pada tabel hasil
+            const rTable = document.getElementById('rankingTable');
+            rTable.innerHTML = hasilAkhir.map((h, index) => `
+                <tr class="${index === 0 ? 'bg-emerald-500/20 font-bold text-emerald-300' : 'hover:bg-slate-700/20'}">
+                    <td class="p-3 text-center w-24">${index + 1} ${index === 0 ? '🏆 Terbaik' : ''}</td>
+                    <td class="p-3">${h.name}</td>
+                    <td class="p-3 font-mono">${h.score.toFixed(4)}</td>
+                </tr>
+            `).join('');
+
+            // Tampilkan section hasil & scroll ke bawah otomatis
+            document.getElementById('hasilSection').classList.remove('hidden');
+            document.getElementById('hasilSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
